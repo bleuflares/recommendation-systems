@@ -50,7 +50,10 @@ if __name__ == "__main__":
 			dot = dot + arr1[i] * arr2[i]
 			length1 = length1 + arr1[i] * arr1[i]
 			length2 = length2 + arr2[i] * arr2[i]
-		return dot / (math.sqrt(length1) * math.sqrt(length2))
+		if length1 == 0 or length2 == 0:
+			return 99999999
+		else:
+			return dot / (math.sqrt(length1) * math.sqrt(length2))
 
 	user_distances = np.zeros(max_user)
 
@@ -90,7 +93,7 @@ if __name__ == "__main__":
 	for i in range(1000):
 		count = 0
 		rating_sum = 0
-		for j in range(10):
+		for j in range(len(min_10_indices[i])):
 			rating = ratings[599][min_10_indices[i][j]]
 			if rating != 0:
 				rating_sum += rating
@@ -113,8 +116,11 @@ if __name__ == "__main__":
 		rating_sum = 0
 		count = 0
 		for i in range(10):
+			rating = ratings[user_max_idx[i]][j]
+			print(rating)
 			if rating != 0:
-				rating_sum = rating_sum + ratings[user_max_idx[i]][j]
+				rating_sum = rating_sum + rating
+				count = count + 1
 		predicted_user_ratings[j] = rating_sum / count
 
 	top5_user_indices = np.argsort(predicted_user_ratings)[-5:]
