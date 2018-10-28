@@ -33,15 +33,6 @@ if __name__ == "__main__":
 			if ratings[i][j] != 0:
 				normalized_ratings[i][j] = ratings[i][j] - user_means[i]
 
-		"""
-		user_means = np.full((1, y), ratings.mean(ratings[i, :]))
-
-		for i in range(x - 1):
-			user_means = np.concatenate(user_means, np.full((1, y), ratings.mean(ratings[i + 1, :])))
-		
-		normalized_ratings = ratings - user_means
-		"""
-
 	def cosine_distance(arr1, arr2):
 		dot = 0
 		length1 = 0
@@ -78,17 +69,6 @@ if __name__ == "__main__":
 			min_10_idx.append(item_indices[k])
 		min_10_indices.append(min_10_idx)
 
-	print("item dist calc fin")
-	"""
-	item_idx = np.argpartition(item_distances[0], 10)[10:]
-	item_max_idx = item_idx[np.argsort(item_distances[item_idx])]
-	for i in range(999):
-		item_idx = np.argpartition(item_distances[i], 10)[10:]
-		item_max_idx = np.concatenate(item_max_idx, item_idx[np.argsort(item_distances[item_idx])])
-
-	print("max item found")
-	"""
-
 	predicted_item_ratings = np.zeros(1000)
 	for i in range(1000):
 		count = 0
@@ -104,12 +84,9 @@ if __name__ == "__main__":
 
 	for i in range(5):
 		print(predicted_item_ratings[top5_item_indices[i]])
-		print("predict item got")
 	
 	user_idx = np.argpartition(user_distances, 10)[10:]
 	user_max_idx = user_idx[np.argsort(user_distances[user_idx])]
-
-	print("max user found")
 	
 	predicted_user_ratings = np.zeros(1000)
 	for j in range(1000):
@@ -127,4 +104,3 @@ if __name__ == "__main__":
 
 	for i in range(5):
 		print(predicted_user_ratings[top5_user_indices[i]])
-		print("predict user got")
