@@ -42,9 +42,6 @@ if __name__ == "__main__":
 		normalized_ratings = ratings - user_means
 		"""
 
-	user_distances = np.zeros(max_user)
-	item_distances = np.zeros((1000, max_item))
-
 	def cosine_distance(arr1, arr2):
 		dot = 0
 		length1 = 0
@@ -55,22 +52,31 @@ if __name__ == "__main__":
 			length2 = length2 + arr2[i] * arr2[i]
 		return dot / (math.sqrt(length1) * math.sqrt(length2))
 
+	user_distances = np.zeros(max_user)
+
 	for i in range(max_user):
 		if i != 599:
 			user_distances[i] = cosine_distance(normalized_ratings[599], normalized_ratings[i])
 	user_distances[599] = 99999999
 
 	print("user dist calc fin")
-	
+
+	min_10_indices = []
 	for i in range(1000):
+		item_distances = []
+		item_indices = []
 		for j in range(max_item):
 			if i != j and ratings[599][j] != 0:
-				item_distances[i][j] = cosine_distance(ratings[:, i], ratings[:, j])
-			else:
-				item_distances[i][j] = 99999999
+				item_distances.append(cosine_distance(ratings[:, i], ratings[:, j]))
+				item_indices.append(j)
+		min_10 = sorted(range(len(item_distances)), key=lambda i: item_distances[i])[:10]
+		min_10_idx = []
+		for k in min_10:
+			min_10_idx.append(item_indices[k])
+		min_10_indices.append(min_10_idx)
 
 	print("item dist calc fin")
-
+	"""
 	item_idx = np.argpartition(item_distances[0], 10)[10:]
 	item_max_idx = item_idx[np.argsort(item_distances[item_idx])]
 	for i in range(999):
@@ -78,12 +84,24 @@ if __name__ == "__main__":
 		item_max_idx = np.concatenate(item_max_idx, item_idx[np.argsort(item_distances[item_idx])])
 
 	print("max item found")
+	"""
 
-	predicted_item_reatings = np.zeros(1000)
+	predicted_item_ratings = np.zeros(1000)
 	for i in range(1000):
-		predicted_item_reatings[i] = np.mean(ratings[599:, item_max_idx[i]])
+		count = 0
+		rating_sum = 0
+		for j in range(10):
+			rating = ratings[599][min_10_indices[i][j]]
+			if rating != 0:
+				rating_sum += rating
+				count += 1
+		predicted_item_ratings[i] = rating_sum / count
 
-	print("predict item got")
+	top5_item_indices = np.argsort(predicted_item_ratings)[-5:]
+
+	for i in range(5):
+		print(predicted_item_ratings[top5_item_indices[i]])
+		print("predict item got")
 	
 	user_idx = np.argpartition(user_distances, 10)[10:]
 	user_max_idx = user_idx[np.argsort(user_distances[user_idx])]
@@ -92,14 +110,15 @@ if __name__ == "__main__":
 	
 	predicted_user_ratings = np.zeros(1000)
 	for j in range(1000):
-		avg = 0
+		rating_sum = 0
+		count = 0
 		for i in range(10):
-			avg = avg + ratings[user_max_idx[i]][j]
-		predicted_user_ratings[j] = avg / 10
+			if rating != 0:
+				rating_sum = rating_sum + ratings[user_max_idx[i]][j]
+		predicted_user_ratings[j] = rating_sum / count
 
 	top5_user_indices = np.argsort(predicted_user_ratings)[-5:]
 
 	for i in range(5):
 		print(predicted_user_ratings[top5_user_indices[i]])
-
 		print("predict user got")
