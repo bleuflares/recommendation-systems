@@ -33,14 +33,6 @@ if __name__ == "__main__":
 		for i in range(len(points)):
 			for j in range(len(points)):
 				distances[i, j] = distance(points[i], points[j])
-		"""
-		x, y = np.unravel_index(distances.argmax(), distances.shape)
-		k_means.append(points[x])
-		k_means.append(points[y])
-		k_means_indices.append(x)
-		k_means_indices.append(y)
-		k_means_exclude = list(set(range(len(points))) - set(k_means_indices))
-		"""
 		while(len(k_means) < k):
 			row_idx = np.array(k_means_indices)
 			col_idx = np.array(k_means_exclude)
@@ -53,12 +45,6 @@ if __name__ == "__main__":
 	input_file.close()
 
 	def k_means_distance(arr):
-		"""
-		arr = line.split()
-		arr_ = []
-		for i in arr:
-			arr_.append(float(i))
-		"""
 		min_dist = 9999999999
 		min_point = None
 		for point in k_means:
