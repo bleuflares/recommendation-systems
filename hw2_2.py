@@ -71,7 +71,7 @@ if __name__ == "__main__":
 		item_distances = []
 		item_indices = []
 		for j in range(max_item):
-			if i != j: #and ratings[598][j] != 0 ?? should I add it or not?
+			if i != j: # and ratings[598][j] != 0 ?? should I add it or not?
 				item_distances.append(cosine_distance(ratings[:, i], ratings[:, j]))
 				item_indices.append(j)
 		min_10 = sorted(range(len(item_distances)), key=lambda i: item_distances[i])[:10]
@@ -85,10 +85,11 @@ if __name__ == "__main__":
 		count = 0
 		rating_sum = 0
 		for j in range(len(min_10_indices[i])):
-			rating = ratings[599][min_10_indices[i][j]]
+			rating = ratings[598][min_10_indices[i][j]]
 			if rating != 0:
 				rating_sum += rating
 				count += 1
+		
 		#if and ratings[598][j] != 0  used in upper for, if count ==0 not needed
 		if count == 0:
 			predicted_item_ratings[i] = 0
