@@ -24,23 +24,23 @@ if __name__ == "__main__":
 		points.append(float_point)
 
 	distances = np.zeros((len(points), len(points)))
+	
+	k_means.append(points[0])
+	k_means_indices.append(0)
+	k_means_exclude = list(set(range(len(points))) - set(k_means_indices))
 
-	if k == 1:
-		k_means.append(points[0])
-		k_means_indices.append(0)
-		k_means_exclude = list(set(range(len(points))) - set(k_means_indices))
-
-	else:
+	if k > 1:
 		for i in range(len(points)):
 			for j in range(len(points)):
 				distances[i, j] = distance(points[i], points[j])
+		"""
 		x, y = np.unravel_index(distances.argmax(), distances.shape)
 		k_means.append(points[x])
 		k_means.append(points[y])
 		k_means_indices.append(x)
 		k_means_indices.append(y)
 		k_means_exclude = list(set(range(len(points))) - set(k_means_indices))
-
+		"""
 		while(len(k_means) < k):
 			row_idx = np.array(k_means_indices)
 			col_idx = np.array(k_means_exclude)
@@ -51,8 +51,6 @@ if __name__ == "__main__":
 			k_means_exclude = list(set(range(len(points))) - set(k_means_indices))
 
 	input_file.close()
-	#print(k_means_indices)
-	#print(k_means_exclude)
 
 	def k_means_distance(arr):
 		"""
@@ -61,7 +59,7 @@ if __name__ == "__main__":
 		for i in arr:
 			arr_.append(float(i))
 		"""
-		min_dist = 99999999
+		min_dist = 9999999999
 		min_point = None
 		for point in k_means:
 			dist = distance(point, arr)
@@ -72,14 +70,11 @@ if __name__ == "__main__":
 
 	def max_distance(pair):
 		max_dist = 0
-		#max_points = (pair[1][0], pair[1][1])
 		for i in pair[1]:
 			for j in pair[1]:
 				dist = distance(i, j)
 				if max_dist < dist:
 					max_dist = dist
-					#max_point = (i, j)
-		#print(max_point, max_dist)
 		return (pair[0], max_dist)
 
 	conf = SparkConf()
