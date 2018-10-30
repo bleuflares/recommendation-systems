@@ -21,13 +21,13 @@ if __name__ == "__main__":
 	max_item = len(item_sets)
 
 	item_sets_list = list(item_sets)
-	max_idx = 0
+	max_1000 = 0
 	for i in range(1000):
 		if i in item_sets_list:
-			if i > max_idx:
-				max_idx = i
+			if i > max_1000:
+				max_1000 = i
+	max_idx = item_sets_list.index(max_1000)
 	print(max_idx)
-	print(item_sets_list.index(max_idx))
 	
 	ratings = np.zeros((max_user, max_item))
 
