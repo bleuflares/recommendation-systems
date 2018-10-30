@@ -66,6 +66,32 @@ if __name__ == "__main__":
 
 	print("user dist calc fin")
 
+	user_min_10 = np.argsort(user_distances)[:10]
+	
+	print("user_min idx and distances")
+	print(user_min_10)
+	print(user_distances[user_min_10])
+
+	predicted_user_ratings = np.zeros(max_idx + 1)
+	for j in range(max_idx + 1):
+		rating_sum = 0
+		count = 0
+		for i in range(len(user_min_10)):
+			rating = ratings[user_min_10[i]][j]
+			if rating != 0:
+				rating_sum = rating_sum + rating
+				count = count + 1
+		if count == 0:
+			predicted_user_ratings[j] = 0
+		else:
+			predicted_user_ratings[j] = rating_sum / count
+
+	top5_user_indices = np.argsort(predicted_user_ratings)[-5:]
+	print(top5_user_indices)
+
+	for i in range(len(top5_user_indices)):
+		print(predicted_user_ratings[top5_user_indices[i]]) # need to match with real movie number
+
 	min_10_indices = []
 	for i in range(max_idx):
 		item_distances = []
@@ -101,38 +127,3 @@ if __name__ == "__main__":
 
 	for i in range(len(top5_item_indices)):
 		print(predicted_item_ratings[top5_item_indices[i]])
-	"""
-	user_min_10 = np.argpartition(user_distances, 10)[:10]
-	print("unsorted")
-	print(user_distances[user_min_10])
-	user_idx = user_min_10[np.argsort(user_distances[user_min_10])]
-	
-	print("similar users are")
-	print(user_idx)
-	"""
-
-	user_min_10 = np.argsort(user_distances)[:10]
-	
-	print("user_min idx and distances")
-	print(user_min_10)
-	print(user_distances[user_min_10])
-
-	predicted_user_ratings = np.zeros(max_idx + 1)
-	for j in range(max_idx + 1):
-		rating_sum = 0
-		count = 0
-		for i in range(len(user_min_10)):
-			rating = ratings[user_min_10[i]][j]
-			if rating != 0:
-				rating_sum = rating_sum + rating
-				count = count + 1
-		if count == 0:
-			predicted_user_ratings[j] = 0
-		else:
-			predicted_user_ratings[j] = rating_sum / count
-
-	top5_user_indices = np.argsort(predicted_user_ratings)[-5:]
-	print(top5_user_indices)
-
-	for i in range(len(top5_user_indices)):
-		print(predicted_user_ratings[top5_user_indices[i]]) # need to match with real movie number
