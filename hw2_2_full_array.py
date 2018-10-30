@@ -41,7 +41,16 @@ if __name__ == "__main__":
 
 	user_means = np.zeros(max_user)
 	for i in range(max_user):
-		user_means = ratings.mean(axis = 0)
+		user_mean = 0
+		user_count = 0
+		for j in range(max_item)
+			if ratings[i][j] != 0:
+				user_mean += ratings[i][j]
+				user_count += 1
+		if user_count > 0:
+			user_means.append(user_mean / user_count)
+		else:
+			user_means.append(0)
 
 	normalized_ratings = np.zeros((max_user, max_item))
 	for i in range(max_user):
