@@ -43,7 +43,7 @@ if __name__ == "__main__":
 	for i in range(max_user):
 		user_mean = 0
 		user_count = 0
-		for j in range(max_item)
+		for j in range(max_item):
 			if ratings[i][j] != 0:
 				user_mean += ratings[i][j]
 				user_count += 1
