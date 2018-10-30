@@ -20,7 +20,7 @@ if __name__ == "__main__":
 			max_item = int(point[1])
 		points.append([int(point[0]), int(point[1]), float(point[2])])
 
-	item_sets_list = list(item_sets)
+	item_sets_list = sorted(list(item_sets))
 	max_1000 = 0
 	for i in range(1000):
 		if i in item_sets_list:
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 	for point in points:
 		ratings[point[0] - 2][point[1] - 1] = point[2] #user 1 does not exist, start from 2, user 2 goes to row 0 movie 1 goes to col 0
 
-	user_means = np.zeros(max_user)
+	user_means = []
 	for i in range(max_user):
 		user_mean = 0
 		user_count = 0
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 	for i in range(max_user):
 		for j in range(max_item):
 			if ratings[i][j] != 0:
-				normalized_ratings[i][j] = ratings[i][j] - user_means[i] #normalize rating by subtracting the row sum
+				normalized_ratings[i][j] = ratings[i][j] - user_means[i] #normalize rating by subtracting the row mean
 
 	def cosine_distance(arr1, arr2): # cosine distance btw two arrays
 		dot = np.sum(arr1 * arr2)
@@ -87,6 +87,8 @@ if __name__ == "__main__":
 		if count == 0: #rate 0 to exclude if no one rated
 			predicted_user_ratings[j] = 0
 		else:
+			if j == 174 or j == 439 or j ==526 or j == 831 or j == 479:
+				print(j, rating_sum, count)
 			predicted_user_ratings[j] = rating_sum / count
 
 	top5_user_indices = np.argsort(predicted_user_ratings)[-5:][::-1] #get the index top 5 ratings
@@ -121,7 +123,9 @@ if __name__ == "__main__":
 				count += 1
 		if count == 0: # this is not needed if we put "and ratings[598][j] != 0:" in line 95
 			predicted_item_ratings[i] = 0
-		else:	
+		else:
+			if i == 174 or i == 439 or i ==526 or i == 831 or i == 479:
+				print(j, rating_sum, count)
 			predicted_item_ratings[i] = rating_sum / count
 
 	top5_item_indices = np.argsort(predicted_item_ratings)[-5:][::-1]
