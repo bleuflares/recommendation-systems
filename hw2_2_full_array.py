@@ -7,11 +7,13 @@ if __name__ == "__main__":
 
 	max_user = 0
 	max_item = 0
+	item_sets = set()
 
 	points = []
 
 	for line in input_file:
 		point = line.split(',')
+		item_sets.add(int(point[1]))
 		if max_user < int(point[0]):
 			max_user = int(point[0])
 		if max_item < int(point[1]):
@@ -24,7 +26,7 @@ if __name__ == "__main__":
 		if i in item_sets_list:
 			if i > max_1000:
 				max_1000 = i
-	max_idx = item_sets_list.index(max_1000)
+	max_idx = item_sets_list.index(max_1000) + 1
 	print(max_idx)
 
 	ratings = np.zeros((max_user, max_item))
@@ -53,7 +55,7 @@ if __name__ == "__main__":
 		if length1 == 0 or length2 == 0:
 			return 99999999
 		else:
-			return 1- dot / (math.sqrt(length1) * math.sqrt(length2))
+			return 1 - dot / (math.sqrt(length1) * math.sqrt(length2))
 
 	user_distances = np.zeros(max_user)
 
@@ -63,28 +65,30 @@ if __name__ == "__main__":
 	user_distances[598] = 99999999
 
 	user_max_idx = np.argsort(user_distances)[:10]
-	predicted_user_ratings = np.zeros(max_idx + 1)
+	predicted_user_ratings = np.zeros(max_idx)
 
-	for j in range(max_idx + 1):
+	for j in range(max_idx):
 		rating_sum = 0
 		count = 0
 		for i in range(10):
 			rating = ratings[user_max_idx[i]][j]
-			print(rating)
 			if rating != 0:
 				rating_sum = rating_sum + rating
 				count = count + 1
-		predicted_user_ratings[j] = rating_sum / count
+		if count == 0:
+			predicted_user_ratings[j] = 0
+		else:
+			predicted_user_ratings[j] = rating_sum / count
 
-	top5_user_indices = np.argsort(predicted_user_ratings)[-5:]
+	top5_user_indices = np.argsort(predicted_user_ratings)[-5:][::-1]
 
-	for i in range(5):
+	for i in range(len(top5_user_indices)):
 		print(predicted_user_ratings[top5_user_indices[i]])
 
 	print("user calc fin")
 
 	min_10_indices = []
-	for i in range(max_idx + 1):
+	for i in range(max_idx):
 		item_distances = []
 		item_indices = []
 		for j in range(max_item):
@@ -97,8 +101,8 @@ if __name__ == "__main__":
 			min_10_idx.append(item_indices[k])
 		min_10_indices.append(min_10_idx)
 
-	predicted_item_ratings = np.zeros(max_idx + 1)
-	for i in range(max_idx + 1):
+	predicted_item_ratings = np.zeros(max_idx)
+	for i in range(max_idx):
 		count = 0
 		rating_sum = 0
 		for j in range(len(min_10_indices[i])):
@@ -108,7 +112,7 @@ if __name__ == "__main__":
 				count += 1
 		predicted_item_ratings[i] = rating_sum / count
 
-	top5_item_indices = np.argsort(predicted_item_ratings)[-5:]
+	top5_item_indices = np.argsort(predicted_item_ratings)[-5:][::-1]
 
 	for i in range(5):
 		print(predicted_item_ratings[top5_item_indices[i]])
