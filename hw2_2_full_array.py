@@ -87,16 +87,16 @@ if __name__ == "__main__":
 		print(item_sets_list[top5_user_indices[i]]) # id of the movie with the index
 		print(predicted_user_ratings[top5_user_indices[i]]) # top 5 ratings
 
-	min_10_indices = []
+	min_10_indices = [] # min_10_indices[i] is an array of indices of min 10 distance from i
 	for i in range(max_idx):
-		item_distances = []
-		item_indices = []
+		item_distances = [] #distance between item i and others
+		item_indices = [] #array of index of items
 		for j in range(max_item):
-			if i != j:# and ratings[598][j] != 0:
+			if i != j and ratings[598][j] != 0:
 				item_distances.append(cosine_distance(ratings[:, i], ratings[:, j]))
 				item_indices.append(j)
-		min_10 = sorted(range(len(item_distances)), key=lambda i: item_distances[i])[:10]
-		min_10_idx = []
+		min_10 = sorted(range(len(item_distances)), key=lambda i: item_distances[i])[:10] #min 10 distances
+		min_10_idx = [] #index of min 10 distances
 		for k in min_10:
 			min_10_idx.append(item_indices[k])
 		min_10_indices.append(min_10_idx)
@@ -106,14 +106,19 @@ if __name__ == "__main__":
 		count = 0
 		rating_sum = 0
 		for j in range(len(min_10_indices[i])):
-			rating = ratings[598][min_10_indices[i][j]]
+			rating = ratings[598][min_10_indices[i][j]] # min_10_indices[i][j] is the index of item
 			if rating != 0:
 				rating_sum += rating
 				count += 1
-		predicted_item_ratings[i] = rating_sum / count
+		if count == 0: # this is not needed if we put "and ratings[598][j] != 0:" in line 95
+			predicted_item_ratings[i] = 0
+		else:	
+			predicted_item_ratings[i] = rating_sum / count
 
 	top5_item_indices = np.argsort(predicted_item_ratings)[-5:][::-1]
 
 	for i in range(5):
+		print(top5_user_indices[i])#index of movies rated as top 5
+		print(item_sets_list[top5_user_indices[i]]) # id of the movie with the index
 		print(predicted_item_ratings[top5_item_indices[i]])
 	
