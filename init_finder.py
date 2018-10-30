@@ -3,7 +3,7 @@ import numpy as np
 import math
 from pyspark import SparkConf, SparkContext
 
-def distance(arr1, arr2):
+def distance(arr1, arr2): #Euclidean distance
 	dist = 0
 	for i in range(len(arr1)):
 		dist += (arr1[i] - arr2[i]) * (arr1[i] - arr2[i])
@@ -12,9 +12,9 @@ def distance(arr1, arr2):
 if __name__ == "__main__":
 	input_file = open(sys.argv[1], 'r')
 	k = int(sys.argv[2])
-	points = []
-	k_means = []
-	k_means_indices = []
+	points = [] #list of float coordinates
+	k_means = [] #list of clusteroids
+	k_means_indices = [] #index of cluseroids in points
 
 	for line in input_file:
 		point = line.split()
@@ -23,21 +23,21 @@ if __name__ == "__main__":
 			float_point.append(float(p))
 		points.append(float_point)
 
-	distances = np.zeros((len(points), len(points)))
+	distances = np.zeros((len(points), len(points))) #distance matrix for calculating distance btw all points
 	
-	k_means.append(points[0])
+	k_means.append(points[0]) #first random point is points[0]
 	k_means_indices.append(0)
-	k_means_exclude = list(set(range(len(points))) - set(k_means_indices))
+	k_means_exclude = list(set(range(len(points))) - set(k_means_indices)) #non-clusteroid points
 
 	if k > 1:
-		for i in range(len(points)):
+		for i in range(len(points)): #calculate distance btw points
 			for j in range(len(points)):
 				distances[i, j] = distance(points[i], points[j])
-		while(len(k_means) < k):
-			row_idx = np.array(k_means_indices)
+		while(len(k_means) < k): #while there are fewer than k points
+			row_idx = np.array(k_means_indices) #row is selected points
 			col_idx = np.array(k_means_exclude)
-			a = distances[row_idx[:, None], col_idx]
-			x, y = np.unravel_index(a.argmax(), a.shape)
+			a = distances[row_idx, col_idx] # ditance from selected points to non-selected ones
+			x, y = np.unravel_index(np.argmax(a, axis=None), a.shape) #get the index with max distance
 			k_means.append(points[y])
 			k_means_indices.append(y)
 			k_means_exclude = list(set(range(len(points))) - set(k_means_indices))
