@@ -36,15 +36,18 @@ if __name__ == "__main__":
 		while(len(k_means) < k): #while there are fewer than k points
 			row_idx = np.array(k_means_indices) #row is selected points
 			col_idx = np.array(k_means_exclude)
-			a = distances[row_idx, col_idx] # ditance from selected points to non-selected ones
-			x, y = np.unravel_index(np.argmax(a, axis=None), a.shape) #get the index with max distance
-			k_means.append(points[y])
-			k_means_indices.append(y)
+			dist_arr = distances[row_idx[:, None], col_idx] # min ditance from selected points to non-selected ones
+			min_dist_arr = np.min(dist_arr, axis=0)
+			yval = np.unravel_index(min_dist_arr.argmax(), min_dist_arr.shape) #get the index with max distance
+			y = yval[0]
+			k_means.append(points[col_idx[y]])
+			k_means_indices.append(col_idx[y])
 			k_means_exclude = list(set(range(len(points))) - set(k_means_indices))
+	print(k_means_indices)
 
 	input_file.close()
 
-	def k_means_distance(arr):
+	def k_means_distance(arr): #find a k_mean whose distance from arr is smallest and return it as key. value is [arr]
 		min_dist = 9999999999
 		min_point = None
 		for point in k_means:
@@ -54,7 +57,7 @@ if __name__ == "__main__":
 				min_point = point
 		return (k_means.index(min_point), [arr])
 
-	def max_distance(pair):
+	def max_distance(pair): #find the maximum distance among points within the clus
 		max_dist = 0
 		for i in pair[1]:
 			for j in pair[1]:
