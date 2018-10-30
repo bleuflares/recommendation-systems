@@ -4,96 +4,164 @@ import math
 
 
 def cosine_distance(arr1, arr2):
-	dot = np.sum(arr1 * arr2)
-	length1 = np.sum(arr1 * arr1)
-	length2 = np.sum(arr2 * arr2)
-	if length1 == 0 or length2 == 0:
-		return 99999999
-	else:
-		return 1 - dot / (math.sqrt(length1) * math.sqrt(length2))
+    dot = np.sum(arr1 * arr2)
+    length1 = np.sum(arr1 * arr1)
+    length2 = np.sum(arr2 * arr2)
+    if length1 == 0 or length2 == 0:
+        return 99999999
+    else:
+        return 1 - dot / (math.sqrt(length1) * math.sqrt(length2))
+
+def predict(x, y):
+    val = np.sum(x * y)
+    if val > 5:
+        val = 5
+    if val < 1:
+        val = 1
+    return val
+
+def train(U, V, max_user, max_item, k, ratings, lrate=0.035, regularizer=0.01):
+    sse = 0.0
+    n = 0
+    # get current rating
+    for i in range(max_user):
+        for j in range(max_item):
+            rating = ratings[i][j]
+            err = rating - predict(U[i], np.transpose(V[:, j]))
+            sse += err**2
+            n += 1
+            uTemp = U[i][k]
+            vTemp = V[k][j]
+            U[i][k] += lrate * (err * vTemp - regularizer * uTemp)
+            V[k][j] += lrate * (err * uTemp - regularizer * vTemp)
+    return math.sqrt(sse / n)
+
+def trainall(U, V, ratings, maxepoch, threshold):
+    # stub -- initial train error
+    prevtrainerr = 1000000.0
+    max_user, feat = U.shape
+    _, max_item = V.shape
+    for k in range(feat):
+        for epoch in range(maxepoch):
+            U, V, trainerr = train(U, V, max_user, max_item, k, ratings)
+            if abs(oldtrainerr - trainerr) < threshold:
+                break
+            prevtrainerr = trainerr
+    return U, V
+
+
+def get_UV(input_file, feat):
+    
+    max_user = 0
+    max_item = 0
+    item_sets = set()
+
+    points = []
+
+    for line in input_file:
+        point = line.split(',')
+        item_sets.add(int(point[1]))
+        if max_user < int(point[0]):
+            max_user = int(point[0])
+        if max_item < int(point[1]):
+            max_item = int(point[1])
+        points.append([int(point[0]), int(point[1]), float(point[2])])
+
+    item_sets_list = list(item_sets)
+
+    max_user = max_user - 1
+    
+    print(max_user)
+    print(max_item)
+    
+    ratings = np.zeros((max_user, max_item))
+
+    avg_rating = 0
+    for point in points:
+        ratings[point[0] - 2][items_indices.index(point[1])] = point[2]
+        avg_rating += point[2]
+
+    avg_rating = avg_rating / len(points)
+
+    print("max user is", max_user)
+    print("max item is", max_item)
+
+    user_means = []
+    for i in range(max_user):
+        user_mean = 0
+        user_count = 0
+        for j in range(max_item):
+            if ratings[i][j] != 0:
+                user_mean += ratings[i][j]
+                user_count += 1
+        if user_count > 0:
+            user_means.append(user_mean / user_count)
+        else:
+            user_means.append(0)
+
+    normalized_ratings = np.zeros((max_user, max_item))
+    for i in range(max_user):
+        for j in range(max_item):
+            if ratings[i][j] != 0:
+                normalized_ratings[i][j] = ratings[i][j] - user_means[i]
+
+    U = np.full((max_user, feat), avg_rating)
+    V = np.full((feat, max_item), avg_rating)
+
+    U, V = trainall(U, V, normalized_ratings, 10) #input a normalized rating or original rating?
+    print(U)
+    print(V)
+
 
 if __name__ == "__main__":
 
-	input_file = open(sys.argv[1], 'r')
+    input_file = open(sys.argv[1], 'r')
+    U, V = get_UV(input_file, feat)
+    mat = np.matmul(U, V)
 
-	points = []
-	user_sets = set()
-	item_sets = set()
+    output_file = open(sys.argv[2], 'r')
 
-	for line in input_file:
-		point = line.split(',')
-		user_sets.add(int(point[0]))
-		item_sets.add(int(point[1]))
-		points.append([int(point[0]), int(point[1]), float(point[2])])
+    for line in input_file:
+        point = line.split(',')
+        user_sets.add(int(point[0]))
+        item_sets.add(int(point[1]))
+        points.append([int(point[3]), int(point[1]), float(point[2])])
+        points.sort(key=lambda arr: arr[0])
 
-	#user 1 does not exist starts from 2
-	max_user = len(user_sets)
-	max_item = len(item_sets)
+    item_list = sorted(list(item_sets))
+    item_counts = len(item_list)
 
-	items_indices = list(item_sets)
-	max_idx = 0
-	for i in range(1000):
-		if i in items_indices:
-			if i > max_idx:
-				max_idx = i
-	print(max_idx)
-	print(items_indices.index(max_idx))
-	
-	ratings = np.zeros((max_user, max_item))
+    time_ratings = []
+    for i in range(item_counts):
+        time_rating = []
+        for point in points:
+            if item_sets[i] == point[1]:
+                time_rating.append((point[0], point[2]))
+        time_ratings.append(time_rating)
 
-	for point in points:
-		ratings[point[0] - 2][items_indices.index(point[1])] = point[2]
+    output = open("output.txt", 'r')
+    for line in output_file:
+        time_margin = 0
+        point = line.split(',')
+        i = item_list.index(point[1])
+        for j in range(len(time_ratings[i]) - 1):
+            if time_ratings[i][j][0] <= point[3] <= time_ratings[i][j + 1][0]:
+                time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
 
-	print("max user is", max_user)
-	print("max item is", max_item)
+        point[2] = (mat[point[0]][point[1]] + time_margin) / 2
+        output.write(','.join(point) + "\n")
 
-	user_means = np.zeros(max_user)
-	for i in range(max_user):
-		user_means = ratings.mean(axis = 1)
 
-	normalized_ratings = np.zeros((max_user, max_item))
-	for i in range(max_user):
-		for j in range(max_item):
-			if ratings[i][j] != 0:
-				normalized_ratings[i][j] = ratings[i][j] - user_means[i]
+    """
+    trending_margin = np.array(max_item)
+    for i in range(max_item):
+        item_row = trending[i]
+        item_margin = 0
+        for j in range(999):
+            if item_row[j + 1] == 0:
+                break
+            item_margin += (item_row[j] - item_row[j + 1])
+        trending_margin[i] = item_margin
 
-	total_avg = user_means.mean()
-
-	U = np.full((max_user, feat), total_avg)
-	V = np.full((feat, max_item), total_avg)
-
-	def predict(i, j):
-		val = np.sum((U[i] * np.transpose(V[:, j])))
-		if val > 5:
-			val = 5
-		if val < 1:
-			val = 1
-		return val
-
-	def train(k):
-        sse = 0.0
-        n = 0
-        # get current rating
-        for i in range(max_user):
-        	for j in range(max_item):
-            	rating = ratings[i][j]
-            	err = rating - predict(i, j)
-            	sse += err**2
-            	n += 1
-
-        		uTemp = U[i][k]
-        		vTemp = V[k][j]
-
-            	U[i][k] += lrate * (err * vTemp - regularizer * uTemp)
-            	V[k][j] += lrate * (err * uTemp - regularizer * vTemp)
-        return math.sqrt(sse / n)
-
-    def trainall(feat, maxepoch):        
-        # stub -- initial train error
-        prevtrainerr = 1000000.0
-        for k in range(feat):
-            for epoch in range(maxepoch):
-                trainerr = train(U, V, k)
-                if abs(oldtrainerr - trainerr) < threshold:
-                    break
-                prevtrainerr = trainerr
+    margin_mean = np.mean(trending_margin)
+    """
