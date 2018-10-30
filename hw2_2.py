@@ -71,6 +71,9 @@ if __name__ == "__main__":
 	print(user_distances[user_min_10])
 
 	predicted_user_ratings = np.zeros(max_idx)
+	
+	counts = []
+	
 	for j in range(max_idx):
 		rating_sum = 0
 		count = 0
@@ -79,6 +82,7 @@ if __name__ == "__main__":
 			if rating != 0:
 				rating_sum = rating_sum + rating
 				count = count + 1
+		counts.append(count)
 		if count == 0:
 			predicted_user_ratings[j] = 0
 		else:
@@ -88,7 +92,8 @@ if __name__ == "__main__":
 	print(top5_user_indices)
 
 	for i in range(len(top5_user_indices)):
-		print(predicted_user_ratings[top5_user_indices[i]]) # need to match with real movie number
+		print("rating", predicted_user_ratings[top5_user_indices[i]])
+		print("count", counts[top5_user_indices[i]]) # need to match with real movie number
 
 	min_10_indices = []
 	for i in range(max_idx):
@@ -105,6 +110,7 @@ if __name__ == "__main__":
 		min_10_indices.append(min_10_idx)
 		#min_10_indices[i] is a list of indices where 10 min distances appear for item i
 
+	counts = []
 	predicted_item_ratings = np.zeros(max_idx)
 	for i in range(max_idx):
 		count = 0
@@ -114,7 +120,7 @@ if __name__ == "__main__":
 			if rating != 0:
 				rating_sum += rating
 				count += 1
-		
+		counts.append(count)
 		#if and ratings[598][j] != 0  used in upper for, if count ==0 not needed
 		if count == 0:
 			predicted_item_ratings[i] = 0
@@ -125,4 +131,5 @@ if __name__ == "__main__":
 	print(top5_item_indices)
 
 	for i in range(len(top5_item_indices)):
-		print(predicted_item_ratings[top5_item_indices[i]])
+		print("ratings", predicted_item_ratings[top5_item_indices[i]])
+		print("counts", counts[top5_item_indices[i]])
