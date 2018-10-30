@@ -47,7 +47,7 @@ if __name__ == "__main__":
 		for j in range(max_item):
 			if ratings[i][j] != 0:
 				normalized_ratings[i][j] = ratings[i][j] - user_means[i]
-
+	print(normalized_ratings)
 	def cosine_distance(arr1, arr2):
 		dot = np.sum(arr1 * arr2)
 		length1 = np.sum(arr1 * arr1)
@@ -60,14 +60,14 @@ if __name__ == "__main__":
 	user_distances = np.zeros(max_user)
 
 	for i in range(max_user):
-		if i != 598:
-			user_distances[i] = cosine_distance(normalized_ratings[598], normalized_ratings[i])
-	user_distances[598] = 99999999
+		if i != 1:
+			user_distances[i] = cosine_distance(normalized_ratings[1], normalized_ratings[i])
+	user_distances[1] = 99999999
 
 	print("user dist calc fin")
 
 	min_10_indices = []
-	for i in range(max_idx + 1):
+	for i in range(7 + 1):
 		item_distances = []
 		item_indices = []
 		for j in range(max_item):
@@ -80,12 +80,12 @@ if __name__ == "__main__":
 			min_10_idx.append(item_indices[k])
 		min_10_indices.append(min_10_idx)
 
-	predicted_item_ratings = np.zeros(max_idx + 1)
-	for i in range(max_idx + 1):
+	predicted_item_ratings = np.zeros(7 + 1)
+	for i in range(7 + 1):
 		count = 0
 		rating_sum = 0
 		for j in range(len(min_10_indices[i])):
-			rating = ratings[598][min_10_indices[i][j]]
+			rating = ratings[1][min_10_indices[i][j]]
 			if rating != 0:
 				rating_sum += rating
 				count += 1
@@ -117,11 +117,11 @@ if __name__ == "__main__":
 	print(user_min_10)
 	print(user_distances[user_min_10])
 
-	predicted_user_ratings = np.zeros(max_idx + 1)
-	for j in range(max_idx + 1):
+	predicted_user_ratings = np.zeros(7 + 1)
+	for j in range(7 + 1):
 		rating_sum = 0
 		count = 0
-		for i in range(10):
+		for i in range(3):
 			rating = ratings[user_min_10[i]][j]
 			if rating != 0:
 				rating_sum = rating_sum + rating
@@ -134,5 +134,5 @@ if __name__ == "__main__":
 	top5_user_indices = np.argsort(predicted_user_ratings)[-5:]
 	print(top5_user_indices)
 
-	for i in range(5):
+	for i in range(3):
 		print(predicted_user_ratings[top5_user_indices[i]]) # need to match with real movie number
