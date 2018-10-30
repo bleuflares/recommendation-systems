@@ -26,7 +26,7 @@ if __name__ == "__main__":
 		if i in item_sets_list:
 			if i > max_1000:
 				max_1000 = i
-	max_idx = item_sets_list.index(max_1000)
+	max_idx = item_sets_list.index(max_1000) + 1
 	print(max_idx)
 	
 	ratings = np.zeros((max_user, max_item))
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 	print("user dist calc fin")
 
 	min_10_indices = []
-	for i in range(max_idx + 1):
+	for i in range(max_idx):
 		item_distances = []
 		item_indices = []
 		for j in range(max_item):
@@ -80,8 +80,8 @@ if __name__ == "__main__":
 			min_10_idx.append(item_indices[k])
 		min_10_indices.append(min_10_idx)
 
-	predicted_item_ratings = np.zeros(max_idx + 1)
-	for i in range(max_idx + 1):
+	predicted_item_ratings = np.zeros(max_idx)
+	for i in range(max_idx):
 		count = 0
 		rating_sum = 0
 		for j in range(len(min_10_indices[i])):
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 	top5_item_indices = np.argsort(predicted_item_ratings)[-5:]
 	print(top5_item_indices)
 
-	for i in range(5):
+	for i in range(len(top5_item_indices)):
 		print(predicted_item_ratings[top5_item_indices[i]])
 	"""
 	user_min_10 = np.argpartition(user_distances, 10)[:10]
@@ -121,7 +121,7 @@ if __name__ == "__main__":
 	for j in range(max_idx + 1):
 		rating_sum = 0
 		count = 0
-		for i in range(10):
+		for i in range(len(user_min_10)):
 			rating = ratings[user_min_10[i]][j]
 			if rating != 0:
 				rating_sum = rating_sum + rating
@@ -134,5 +134,5 @@ if __name__ == "__main__":
 	top5_user_indices = np.argsort(predicted_user_ratings)[-5:]
 	print(top5_user_indices)
 
-	for i in range(5):
+	for i in range(len(top5_user_indices)):
 		print(predicted_user_ratings[top5_user_indices[i]]) # need to match with real movie number
