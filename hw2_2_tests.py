@@ -64,19 +64,6 @@ if __name__ == "__main__":
 			user_distances[i] = cosine_distance(normalized_ratings[1], normalized_ratings[i])
 	user_distances[1] = 99999999
 
-	print("user dist calc fin")
-
-	
-	"""
-	user_min_10 = np.argpartition(user_distances, 10)[:10]
-	print("unsorted")
-	print(user_distances[user_min_10])
-	user_idx = user_min_10[np.argsort(user_distances[user_min_10])]
-	
-	print("similar users are")
-	print(user_idx)
-	"""
-
 	user_min_10 = np.argsort(user_distances)[:3]
 	
 	print("user_min idx and distances")
@@ -90,6 +77,7 @@ if __name__ == "__main__":
 		for i in range(len(user_min_10)):
 			rating = ratings[user_min_10[i]][j]
 			if rating != 0:
+				print("rating", rating, "for movie", j, "by user", user_min_10[i])
 				rating_sum = rating_sum + rating
 				count = count + 1
 		if count == 0:
@@ -97,30 +85,32 @@ if __name__ == "__main__":
 		else:
 			predicted_user_ratings[j] = rating_sum / count
 
-	top5_user_indices = np.argsort(predicted_user_ratings)[-5:]
+	top5_user_indices = np.argsort(predicted_user_ratings)[-5:][::-1]
 	print(top5_user_indices)
 
-	for i in range(1):
+	for i in range(len(top5_user_indices)):
 		print(predicted_user_ratings[top5_user_indices[i]]) # need to match with real movie number
 
 
 
 	min_10_indices = []
-	for i in range(0 + 1):
+	for i in range(2):
 		item_distances = []
 		item_indices = []
 		for j in range(max_item):
 			if i != j: # and ratings[1][j] != 0 ?? should I add it or not?
 				item_distances.append(cosine_distance(ratings[:, i], ratings[:, j]))
 				item_indices.append(j)
-		min_10 = sorted(range(len(item_distances)), key=lambda i: item_distances[i])[:10]
+		min_10 = sorted(range(len(item_distances)), key=lambda i: item_distances[i])[:4]
+
 		min_10_idx = []
 		for k in min_10:
 			min_10_idx.append(item_indices[k])
+		print("for target movie", i, "movies with min 10 distances are", min_10_idx)
 		min_10_indices.append(min_10_idx)
 
-	predicted_item_ratings = np.zeros(0 + 1)
-	for i in range(0 + 1):
+	predicted_item_ratings = np.zeros(2)
+	for i in range(2):
 		count = 0
 		rating_sum = 0
 		for j in range(len(min_10_indices[i])):
@@ -135,8 +125,7 @@ if __name__ == "__main__":
 		else:
 			predicted_item_ratings[i] = rating_sum / count
 
-	top5_item_indices = np.argsort(predicted_item_ratings)[-5:]
-	print(top5_item_indices)
+	top5_item_indices = np.argsort(predicted_item_ratings)[-2:][::-1]
 
-	for i in range(1):
+	for i in range(len(top5_item_indices)):
 		print(predicted_item_ratings[top5_item_indices[i]])

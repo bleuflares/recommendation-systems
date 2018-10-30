@@ -64,16 +64,14 @@ if __name__ == "__main__":
 			user_distances[i] = cosine_distance(normalized_ratings[598], normalized_ratings[i])
 	user_distances[598] = 99999999
 
-	print("user dist calc fin")
-
 	user_min_10 = np.argsort(user_distances)[:10]
 	
 	print("user_min idx and distances")
 	print(user_min_10)
 	print(user_distances[user_min_10])
 
-	predicted_user_ratings = np.zeros(max_idx + 1)
-	for j in range(max_idx + 1):
+	predicted_user_ratings = np.zeros(max_idx)
+	for j in range(max_idx):
 		rating_sum = 0
 		count = 0
 		for i in range(len(user_min_10)):
@@ -86,7 +84,7 @@ if __name__ == "__main__":
 		else:
 			predicted_user_ratings[j] = rating_sum / count
 
-	top5_user_indices = np.argsort(predicted_user_ratings)[-5:]
+	top5_user_indices = np.argsort(predicted_user_ratings)[-5:][::-1]
 	print(top5_user_indices)
 
 	for i in range(len(top5_user_indices)):
@@ -105,6 +103,7 @@ if __name__ == "__main__":
 		for k in min_10:
 			min_10_idx.append(item_indices[k])
 		min_10_indices.append(min_10_idx)
+		#min_10_indices[i] is a list of indices where 10 min distances appear for item i
 
 	predicted_item_ratings = np.zeros(max_idx)
 	for i in range(max_idx):
@@ -122,7 +121,7 @@ if __name__ == "__main__":
 		else:
 			predicted_item_ratings[i] = rating_sum / count
 
-	top5_item_indices = np.argsort(predicted_item_ratings)[-5:]
+	top5_item_indices = np.argsort(predicted_item_ratings)[-5:][::-1]
 	print(top5_item_indices)
 
 	for i in range(len(top5_item_indices)):
