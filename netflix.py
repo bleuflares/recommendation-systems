@@ -139,6 +139,22 @@ if __name__ == "__main__":
                 time_rating.append((point[0], point[2]))
         time_ratings.append(time_rating)
 
+    rmse = 0.0
+    count = 0
+    for line in output_file:
+        time_margin = 0
+        point = line.split(',')
+        i = item_list.index(point[1])
+        for j in range(len(time_ratings[i]) - 1):
+            if time_ratings[i][j][0] <= point[3] <= time_ratings[i][j + 1][0]:
+                time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
+
+        err = ((mat[point[0]][point[1]] + time_margin) / 2 - point[2])
+        rmse += err**2
+        count += 1
+    print(rmse/count)
+
+    """
     output = open("output.txt", 'r')
     for line in output_file:
         time_margin = 0
@@ -150,6 +166,7 @@ if __name__ == "__main__":
 
         point[2] = (mat[point[0]][point[1]] + time_margin) / 2
         output.write(','.join(point) + "\n")
+    """
 
 
     """
