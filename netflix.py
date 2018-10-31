@@ -128,7 +128,7 @@ if __name__ == "__main__":
         item_margin = 0
         if len(time_rating) > 1:
             for j in range(len(time_rating) - 1):
-                item_margin += (item_row[j] - item_row[j + 1])
+                item_margin += (time_rating[j] - time_rating[j + 1])
             trending_margin.append(item_margin / (len(time_rating) - 1))
         else:
             trending_margin.append(0)
