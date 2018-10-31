@@ -137,17 +137,20 @@ if __name__ == "__main__":
             trending_margin[i] = trending_margin[i] - margin_mean
 
     #finished with input processing
+    input_file.close()
+
 
     #get the U, V approximate
     U, V = get_UV(ratings, max_user, max_item, avg_rating, 10)
     mat = np.matmul(U, V)
 
-    output_file = open(sys.argv[2], 'r')
+    test_file = open(sys.argv[2], 'r')
+    output_file = open("output.txt", 'w')
     weight = 1.0
     rmse = 0.0
     count = 0
     #apply time margin and write output
-    for line in output_file:
+    for line in test_file:
         time_margin = 0
         point = line.split(',')
         if int(point[1]) in item_sets_list:
@@ -165,5 +168,8 @@ if __name__ == "__main__":
             err = (prediction - float(point[2]))
             rmse += err**2
             count += 1
+        output_file.write(','.join([point[0], point[1], prediction, point[3]]))
     #rsme value
     print(math.sqrt(rmse / count))
+    output_file.close()
+    test_file.close()
