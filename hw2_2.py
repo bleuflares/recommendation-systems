@@ -20,7 +20,7 @@ if __name__ == "__main__":
 	max_user = len(user_sets)
 	max_item = len(item_sets)
 
-	item_sets_list = list(item_sets)
+	item_sets_list = sorted(list(item_sets))
 	max_1000 = 0
 	for i in range(1000):
 		if i in item_sets_list:
@@ -38,9 +38,18 @@ if __name__ == "__main__":
 	print("max item is", max_item)
 	#print(ratings[0])
 
-	user_means = np.zeros(max_user)
+	user_means = []
 	for i in range(max_user):
-		user_means = ratings.mean(axis = 1)
+		user_mean = 0
+		user_count = 0
+		for j in range(max_item):
+			if ratings[i][j] != 0:
+				user_mean += ratings[i][j]
+				user_count += 1
+		if user_count > 0:
+			user_means.append(user_mean / user_count)
+		else:
+			user_means.append(0)
 
 	normalized_ratings = np.zeros((max_user, max_item))
 	for i in range(max_user):
@@ -65,10 +74,6 @@ if __name__ == "__main__":
 	user_distances[598] = 99999999
 
 	user_min_10 = np.argsort(user_distances)[:10]
-	
-	print("user_min idx and distances")
-	print(user_min_10)
-	print(user_distances[user_min_10])
 
 	predicted_user_ratings = np.zeros(max_idx)
 	
@@ -78,22 +83,24 @@ if __name__ == "__main__":
 		rating_sum = 0
 		count = 0
 		for i in range(len(user_min_10)):
-			rating = ratings[user_min_10[i]][j]
+			rating = normalized_ratings[user_min_10[i]][j]
 			if rating != 0:
 				rating_sum = rating_sum + rating
 				count = count + 1
-		counts.append(count)
 		if count == 0:
 			predicted_user_ratings[j] = 0
 		else:
 			predicted_user_ratings[j] = rating_sum / count
 
 	top5_user_indices = np.argsort(predicted_user_ratings)[-5:][::-1]
-	print(top5_user_indices)
 
 	for i in range(len(top5_user_indices)):
-		print("rating", predicted_user_ratings[top5_user_indices[i]])
-		print("count", counts[top5_user_indices[i]]) # need to match with real movie number
+		"""
+		print(top5_user_indices[i])#index of movies rated as top 5
+		print(item_sets_list[top5_user_indices[i]]) # id of the movie with the index
+		print(predicted_user_ratings[top5_user_indices[i]] + user_means[598]) # top 5 ratings
+		"""
+		print("%d\t%f" %(item_sets_list[top5_user_indices[i]], predicted_user_ratings[top5_user_indices[i]] + user_means[598]))
 
 	min_10_indices = []
 	for i in range(max_idx):
@@ -133,3 +140,10 @@ if __name__ == "__main__":
 	for i in range(len(top5_item_indices)):
 		print("ratings", predicted_item_ratings[top5_item_indices[i]])
 		print("counts", counts[top5_item_indices[i]])
+
+		"""
+		print(top5_item_indices[i])#index of movies rated as top 5
+		print(item_sets_list[top5_item_indices[i]]) # id of the movie with the index
+		print(predicted_user_ratings[top5_user_indices[i]] + user_means[598]) # top 5 ratings
+		"""
+		print("%d\t%f" %(item_sets_list[top5_item_indices[i]], predicted_item_ratings[top5_user_indices[i]]))
