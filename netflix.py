@@ -20,7 +20,7 @@ def predict(x, y):
         val = 1
     return val
 
-def train(U, V, max_user, max_item, k, ratings, lrate=0.01, regularizer=0.01):
+def train(U, V, max_user, max_item, k, ratings, lrate=0.035, regularizer=0.01):
     sse = 0.0
     n = 0
     # get current rating
@@ -154,9 +154,9 @@ if __name__ == "__main__":
     #print(mat)
 
     output_file = open(sys.argv[2], 'r')
+    weight = 1.0
     rmse = 0.0
     count = 0
-    no_count = 0
     for line in output_file:
         time_margin = 0
         point = line.split(',')
@@ -167,7 +167,7 @@ if __name__ == "__main__":
                     #time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
                     time_margin = trending_margin[i] * j / (len(time_ratings[i]) - 1)
                     break
-            prediction = np.mean(mat[:, i]) + time_margin
+            prediction = np.mean(mat[:, i]) + weight * time_margin
             if prediction > 5:
                 prediction = 5
             if prediction < 1:
@@ -176,8 +176,7 @@ if __name__ == "__main__":
             #print("mat mean: %f time_margin:%f, rating: %f, err: %f" %(np.mean(mat[:, i]), time_margin, float(point[2]), err))
             rmse += err**2
             count += 1
-        else:
-            no_count += 1
+
     print(math.sqrt(rmse / count))
 
 """
