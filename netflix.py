@@ -20,7 +20,7 @@ def predict(x, y):
         val = 1
     return val
 
-def train(U, V, max_user, max_item, k, ratings, lrate=0.02, regularizer=0.03):
+def train(U, V, max_user, max_item, k, ratings, lrate=0.02, regularizer=0.05):
     sse = 0.0
     n = 0
     # get current rating
