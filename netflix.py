@@ -141,7 +141,7 @@ if __name__ == "__main__":
                 if time_ratings[i][j][0] <= int(point[3]) <= time_ratings[i][j + 1][0]:
                     time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
             err = ((np.mean(mat[:, i]) + time_margin) / 2 - float(point[2]))
-            print("mat mean: %f time_margin:%f, float: %f, err: %f" (np.mean(mat[:, i]), time_margin, float(point[2]), err))
+            print("mat mean: %f time_margin:%f, rating: %f, err: %f" (np.mean(mat[:, i]), time_margin, float(point[2]), err))
             rmse += err**2
             count += 1
         else:
