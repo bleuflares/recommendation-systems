@@ -56,9 +56,9 @@ if __name__ == "__main__":
 				normalized_ratings[i][j] = ratings[i][j] - user_means[i]
 
 	def cosine_distance(arr1, arr2):
-		dot = np.sum(arr1 * arr2)
-		length1 = np.sum(arr1 * arr1)
-		length2 = np.sum(arr2 * arr2)
+		dot = np.sum(np.dot(arr1, arr2))
+		length1 = np.sum(np.dot(arr1, arr1))
+		length2 = np.sum(np.dot(arr2, arr2))
 		if length1 == 0 or length2 == 0:
 			return 99999999
 		else:
@@ -106,7 +106,7 @@ if __name__ == "__main__":
 		item_indices = []
 		for j in range(max_item):
 			if i != j: # and ratings[598][j] != 0 ?? should I add it or not?
-				item_distances.append(cosine_distance(ratings[:, i], ratings[:, j]))
+				item_distances.append(cosine_distance(normalized_ratings[:, i], normalized_ratings[:, j]))
 				item_indices.append(j)
 		min_10 = sorted(range(len(item_distances)), key=lambda i: item_distances[i])[:10]
 		min_10_idx = []
