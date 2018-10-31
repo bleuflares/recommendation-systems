@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     #finished with input processing
 
-    U, V = get_UV(ratings, max_user, max_item, avg_rating, 20)
+    U, V = get_UV(ratings, max_user, max_item, avg_rating, 10)
     mat = np.matmul(U, V)
     #print(mat)
 
