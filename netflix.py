@@ -49,11 +49,7 @@ def trainall(U, V, ratings, maxepoch, threshold):
             prevtrainerr = trainerr
     return U, V
 
-def get_UV(ratings, user_sets_list, item_sets_list, avg_rating, feat):
-    
-    #user 1 does not exist starts from 2
-    max_user = len(user_sets_list)
-    max_item = len(item_sets_list)
+def get_UV(ratings, max_user, max_item, avg_rating, feat):
 
     uv_init = math.sqrt(avg_rating / feat)
     print(uv_init)
@@ -75,7 +71,6 @@ if __name__ == "__main__":
         point = line.split(',')
         user_sets.add(int(point[0]))
         item_sets.add(int(point[1]))
-        print(point[1])
         points.append([int(point[0]), int(point[1]), float(point[2])])
         time_points.append([int(point[3]), int(point[1]), float(point[2])])
     
@@ -94,6 +89,7 @@ if __name__ == "__main__":
         ratings[user_sets_list.index(point[0]) - 2][item_sets_list.index(point[1])] = point[2]
         avg_rating += point[2]
     avg_rating = avg_rating / len(points)
+    print("avg rating fin")
 
     """
     user_means = []
@@ -108,7 +104,7 @@ if __name__ == "__main__":
             user_means.append(user_mean / user_count)
         else:
             user_means.append(0)
-
+    
     normalized_ratings = np.zeros((max_user, max_item))
     for i in range(max_user):
         for j in range(max_item):
@@ -124,27 +120,27 @@ if __name__ == "__main__":
                 time_rating.append((point[0], point[2]))
         time_ratings.append(time_rating)
 
+    print("timerating fin")
+
     #finished with input processing
 
-    U, V = get_UV(ratings, user_sets_list, item_sets_list, avg_rating, 10)
+    U, V = get_UV(ratings, max_user, max_item, avg_rating, 10)
     mat = np.matmul(U, V)
     print(mat)
-    output_file = open(sys.argv[2], 'r')
 
+    output_file = open(sys.argv[2], 'r')
     rmse = 0.0
     count = 0
     no_count = 0
     for line in output_file:
         time_margin = 0
         point = line.split(',')
-        #print(point[1])
-        if point[1] in item_sets_list:
-            print(point[1])
-            i = item_sets_list.index(point[1])
+        if int(point[1]) in item_sets_list:
+            i = item_sets_list.index(int(point[1]))
             for j in range(len(time_ratings[i]) - 1):
-                if time_ratings[i][j][0] <= point[3] <= time_ratings[i][j + 1][0]:
+                if time_ratings[i][j][0] <= int(point[3]) <= time_ratings[i][j + 1][0]:
                     time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
-            err = ((np.mean(mat[:, i]) + time_margin) / 2 - point[2])
+            err = ((np.mean(mat[:, i]) + time_margin) / 2 - float(point[2]))
             rmse += err**2
             count += 1
         else:
@@ -152,6 +148,49 @@ if __name__ == "__main__":
     print(rmse/count)
     print(no_count)
 
+#weight computition code
+    """
+        U, V = get_UV(ratings, user_sets_list, item_sets_list, avg_rating, 10)
+    mat = np.matmul(U, V)
+    print(mat)
+    output_file = open(sys.argv[2], 'r')
+
+    rmse_thrs = 0.01
+    prevrmse = 1.2
+    weight = 0.5
+    lr = 0.01
+
+    test_points = []
+    for line in output_file:
+        point = line.split(',')
+        test_points.append(point)
+        time_margin = 0
+
+    for i in range(maxepoch_):
+        sqerrsum = 0.0
+        count = 0
+        for point in test_points:
+            #print(point[1])
+            if point[1] in item_sets_list:
+                print(point[1])
+                i = item_sets_list.index(point[1])
+                for j in range(len(time_ratings[i]) - 1):
+                    if time_ratings[i][j][0] <= point[3] <= time_ratings[i][j + 1][0]:
+                        time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
+                err = ((np.mean(mat[:, i]) * weight + time_margin * (1 - weight)) - point[2])
+                sqerrsum += err**2
+                count += 1
+
+        rmse = math.sqrt(sqerrsum / count)
+        print("epoch %d rmse %f" %(i, rmse))
+        if abs(prevrmse - rmse) < rmse_thrs:
+            break
+        weight = weight + lr
+        print("weight %f" %weight)
+        prevrmse = rmse
+    """
+
+#output code
     """
     output = open("output.txt", 'r')
     for line in output_file:
@@ -166,7 +205,7 @@ if __name__ == "__main__":
         output.write(','.join(point) + "\n")
     """
 
-
+#margin code may use or not
     """
     trending_margin = np.array(max_item)
     for i in range(max_item):
