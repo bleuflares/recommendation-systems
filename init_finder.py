@@ -43,7 +43,6 @@ if __name__ == "__main__":
 			k_means.append(points[col_idx[y]])
 			k_means_indices.append(col_idx[y])
 			k_means_exclude = list(set(range(len(points))) - set(k_means_indices))
-	print(k_means_indices)
 
 	input_file.close()
 
@@ -75,7 +74,6 @@ if __name__ == "__main__":
 	
 	diameter_sum = 0.0
 	for diameter_pair in diameters:
-		print(math.sqrt(diameter_pair[1]))
 		diameter_sum += math.sqrt(diameter_pair[1])
 
 	print(diameter_sum / float(k))
