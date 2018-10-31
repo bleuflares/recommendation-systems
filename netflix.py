@@ -58,7 +58,7 @@ def get_UV(ratings, max_user, max_item, avg_rating, feat):
     U = np.full((max_user, feat), uv_init)
     V = np.full((feat, max_item), uv_init)
 
-    U, V = trainall(U, V, ratings, 20, 0.1) #input a normalized rating or original rating?
+    U, V = trainall(U, V, ratings, 10, 0.075) #input a normalized rating or original rating?
     return (U, V)
 
 if __name__ == "__main__":
