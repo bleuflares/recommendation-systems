@@ -20,7 +20,7 @@ def predict(x, y):
         val = 1
     return val
 
-def train(U, V, max_user, max_item, k, ratings, lrate=0.035, regularizer=0.01):
+def train(U, V, max_user, max_item, k, ratings, lrate=0.035, regularizer=0.0):
     sse = 0.0
     n = 0
     # get current rating
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     #print(mat)
 
     output_file = open(sys.argv[2], 'r')
-    weight = 0.9
+    weight = 1.0
     rmse = 0.0
     count = 0
     for line in output_file:
