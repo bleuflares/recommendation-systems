@@ -120,8 +120,31 @@ if __name__ == "__main__":
             if item_sets_list[i] == point[1]:
                 time_rating.append((point[0], point[2]))
         time_ratings.append(time_rating)
-
     print("timerating fin")
+
+    trending_margin = []
+    for i in range(max_item):
+        time_rating = time_ratings[i]
+        item_margin = 0
+        if len(time_rating) > 1:
+            for j in range(len(time_rating) - 1):
+                item_margin += (item_row[j] - item_row[j + 1])
+            trending_margin.append(item_margin / (len(time_rating) - 1))
+        else:
+            trending_margin.append(0)
+
+    count = 0
+    for i in range(max_item):
+        if trending_margin[i] != 0:
+            margin_mean += trending_margin[i]
+            count += 1
+    margin_mean = margin_mean / count
+
+    for i in range(max_item):
+        if trending_margin[i] != 0:
+            trending_margin[i] = trending_margin[i] - margin_mean
+    print("trending_margin fin")
+    
 
     #finished with input processing
 
@@ -141,7 +164,12 @@ if __name__ == "__main__":
             for j in range(len(time_ratings[i]) - 1):
                 if time_ratings[i][j][0] <= int(point[3]) <= time_ratings[i][j + 1][0]:
                     time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
-            err = (np.mean(mat[:, i]) - float(point[2]))
+            prediction = (np.mean(mat[:, i]) + trending_margin)
+            if prediction > 5:
+                prediction = 5
+            if prediction < 1:
+                prediction = 1
+            err = (prediction - float(point[2]))
             #print("mat mean: %f time_margin:%f, rating: %f, err: %f" %(np.mean(mat[:, i]), time_margin, float(point[2]), err))
             rmse += err**2
             count += 1
