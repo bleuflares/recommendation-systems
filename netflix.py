@@ -133,6 +133,7 @@ if __name__ == "__main__":
         else:
             trending_margin.append(0)
 
+    margin_mean = 0
     count = 0
     for i in range(max_item):
         if trending_margin[i] != 0:
@@ -150,7 +151,7 @@ if __name__ == "__main__":
 
     U, V = get_UV(ratings, max_user, max_item, avg_rating, 10)
     mat = np.matmul(U, V)
-    print(mat)
+    #print(mat)
 
     output_file = open(sys.argv[2], 'r')
     rmse = 0.0
@@ -164,7 +165,7 @@ if __name__ == "__main__":
             for j in range(len(time_ratings[i]) - 1):
                 if time_ratings[i][j][0] <= int(point[3]) <= time_ratings[i][j + 1][0]:
                     time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
-            prediction = (np.mean(mat[:, i]) + trending_margin)
+            prediction = np.mean(mat[:, i]) + trending_margin[i]
             if prediction > 5:
                 prediction = 5
             if prediction < 1:
