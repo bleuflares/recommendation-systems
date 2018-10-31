@@ -154,7 +154,7 @@ if __name__ == "__main__":
     #print(mat)
 
     output_file = open(sys.argv[2], 'r')
-    weight = 1.5
+    weight = 1.25
     rmse = 0.0
     count = 0
     for line in output_file:
@@ -270,19 +270,4 @@ weight = 1.0
 
         point[2] = (mat[point[0]][point[1]] + time_margin) / 2
         output.write(','.join(point) + "\n")
-"""
-
-#margin code may use or not
-"""
-    trending_margin = np.array(max_item)
-    for i in range(max_item):
-        item_row = trending[i]
-        item_margin = 0
-        for j in range(999):
-            if item_row[j + 1] == 0:
-                break
-            item_margin += (item_row[j] - item_row[j + 1])
-        trending_margin[i] = item_margin
-
-    margin_mean = np.mean(trending_margin)
 """
