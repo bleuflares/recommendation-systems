@@ -75,5 +75,5 @@ if __name__ == "__main__":
 	diameter_sum = 0.0
 	for diameter_pair in diameters:
 		diameter_sum += math.sqrt(diameter_pair[1])
-
 	print(diameter_sum / float(k))
+	sc.setLogLevel('WARN')
