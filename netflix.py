@@ -2,43 +2,34 @@ import sys
 import numpy as np
 import math
 
-
-def cosine_distance(arr1, arr2):
-    dot = np.sum(arr1 * arr2)
-    length1 = np.sum(arr1 * arr1)
-    length2 = np.sum(arr2 * arr2)
-    if length1 == 0 or length2 == 0:
-        return 99999999
-    else:
-        return 1 - dot / (math.sqrt(length1) * math.sqrt(length2))
-
+#predicted rating
 def predict(x, y):
     val = np.sum(x * y)
-    if val > 5:
-        val = 5
-    if val < 1:
-        val = 1
+    if val > 5.0:
+        val = 5.0
+    if val < 1.0:
+        val = 1.0
     return val
 
-def train(U, V, max_user, max_item, k, ratings, lrate=0.02, regularizer=0.05):
+# train for single k by calculating prediction and train U and V by adding proportional to error
+def train(U, V, max_user, max_item, k, ratings, lr=0.02, reg=0.05):
     sse = 0.0
-    n = 0
-    # get current rating
+    count = 0
     for i in range(max_user):
         for j in range(max_item):
             rating = ratings[i][j]
             if rating != 0:
                 err = rating - predict(U[i], np.transpose(V[:, j]))
-                sse += err**2
-                n += 1
-                uTemp = U[i][k]
-                vTemp = V[k][j]
-                U[i][k] += lrate * (err * vTemp - regularizer * uTemp)
-                V[k][j] += lrate * (err * uTemp - regularizer * vTemp)
-    return (U, V, math.sqrt(sse / n))
+                sse += err ** 2
+                count += 1
+                utemp = U[i][k]
+                vtemp = V[k][j]
+                U[i][k] += lr * (err * vtemp - reg * utemp)
+                V[k][j] += lr * (err * utemp - reg * vtemp)
+    return (U, V, math.sqrt(sse / count))
 
+#train each k for multiple epoch until the erro does not change much
 def trainall(U, V, ratings, maxepoch, threshold):
-    # stub -- initial train error
     prevtrainerr = 1000000.0
     max_user, feat = U.shape
     _, max_item = V.shape
@@ -50,10 +41,9 @@ def trainall(U, V, ratings, maxepoch, threshold):
             prevtrainerr = trainerr
     return U, V
 
+#train U, V
 def get_UV(ratings, max_user, max_item, avg_rating, feat):
-
     uv_init = math.sqrt(avg_rating / feat)
-    print(uv_init)
 
     U = np.full((max_user, feat), uv_init)
     V = np.full((feat, max_item), uv_init)
@@ -63,6 +53,7 @@ def get_UV(ratings, max_user, max_item, avg_rating, feat):
 
 if __name__ == "__main__":
 
+#read input, store user-item-rating and item-time-rating
     input_file = open(sys.argv[1], 'r')
     user_sets = set()
     item_sets = set()
@@ -81,16 +72,14 @@ if __name__ == "__main__":
 
     max_user = len(user_sets_list)
     max_item = len(item_sets_list)
-    print("max user is", max_user)
-    print("max item is", max_item)
 
+    #fill rating array and calculate avg rating
     ratings = np.zeros((max_user, max_item))
     avg_rating = 0
     for point in points:
         ratings[user_sets_list.index(point[0]) - 2][item_sets_list.index(point[1])] = point[2]
         avg_rating += point[2]
     avg_rating = avg_rating / len(points)
-    print("avg rating fin")
 
     """
     user_means = []
@@ -113,6 +102,7 @@ if __name__ == "__main__":
                 normalized_ratings[i][j] = ratings[i][j] - user_means[i]
     """
 
+    #record a time rating of each movies
     time_ratings = []
     for i in range(len(item_sets_list)):
         time_rating = []
@@ -120,8 +110,8 @@ if __name__ == "__main__":
             if item_sets_list[i] == point[1]:
                 time_rating.append((point[0], point[2]))
         time_ratings.append(time_rating)
-    print("timerating fin")
 
+    #calculate the average of change in rating along the time for each movie
     trending_margin = []
     for i in range(max_item):
         time_rating = time_ratings[i]
@@ -141,133 +131,39 @@ if __name__ == "__main__":
             count += 1
     margin_mean = margin_mean / count
 
+    #normalize the margin
     for i in range(max_item):
         if trending_margin[i] != 0:
             trending_margin[i] = trending_margin[i] - margin_mean
-    print("trending_margin fin")
-    
 
     #finished with input processing
 
+    #get the U, V approximate
     U, V = get_UV(ratings, max_user, max_item, avg_rating, 10)
     mat = np.matmul(U, V)
-    #print(mat)
 
     output_file = open(sys.argv[2], 'r')
-    weight = 1.1
+    weight = 1.0
     rmse = 0.0
     count = 0
+    #apply time margin and write output
     for line in output_file:
         time_margin = 0
         point = line.split(',')
         if int(point[1]) in item_sets_list:
             i = item_sets_list.index(int(point[1]))
-            for j in range(len(time_ratings[i]) - 1):
+            for j in range(len(time_ratings[i]) - 1): #find the position of timestamp
                 if time_ratings[i][j][0] <= int(point[3]) <= time_ratings[i][j + 1][0]:
-                    #time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
-                    time_margin = trending_margin[i] * j / (len(time_ratings[i]) - 1)
+                    time_margin = trending_margin[i] * j / (len(time_ratings[i]) - 1) #calculate time margin
                     break
-            prediction = np.mean(mat[:, i]) + weight * time_margin
-            if prediction > 5:
-                prediction = 5
-            if prediction < 1:
-                prediction = 1
+            prediction = np.mean(mat[:, i]) + weight * time_margin #calculate prediction
+            #boundary check
+            if prediction > 5.0:
+                prediction = 5.0
+            if prediction < 1.0:
+                prediction = 1.0
             err = (prediction - float(point[2]))
-            #print("mat mean: %f time_margin:%f, rating: %f, err: %f" %(np.mean(mat[:, i]), time_margin, float(point[2]), err))
             rmse += err**2
             count += 1
-
+    #rsme value
     print(math.sqrt(rmse / count))
-
-"""
-regression code
-weight = 1.0
-    lr = 0.01
-    prevrmse = 0.8
-
-    output_file = open(sys.argv[2], 'r')
-    rmse = 0.0
-    count = 0
-    no_count = 0
-
-    #0:time 1: id 2: rating
-    for point in test_points:
-        time_margin = 0
-        if int(point[1]) in item_sets_list:
-            i = item_sets_list.index(point[1])
-            for j in range(len(time_ratings[i]) - 1):
-                if time_ratings[i][j][0] <= point[0] <= time_ratings[i][j + 1][0]:
-                    #time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
-                    time_margin = trending_margin[i] * j / (len(time_ratings[i]) - 1)
-                    break
-            prediction = np.mean(mat[:, i]) + weight * time_margin
-            if prediction > 5:
-                prediction = 5
-            if prediction < 1:
-                prediction = 1
-            err = (prediction - point[2])
-            #print("mat mean: %f time_margin:%f, rating: %f, err: %f" %(np.mean(mat[:, i]), time_margin, float(point[2]), err))
-            rmse += err**2
-            count += 1
-        else:
-            no_count += 1
-    print(math.sqrt(rmse / count))
-"""
-
-
-#weight computition code
-"""
-        U, V = get_UV(ratings, user_sets_list, item_sets_list, avg_rating, 10)
-    mat = np.matmul(U, V)
-    print(mat)
-    output_file = open(sys.argv[2], 'r')
-
-    rmse_thrs = 0.01
-    prevrmse = 1.2
-    weight = 0.5
-    lr = 0.01
-
-    test_points = []
-    for line in output_file:
-        point = line.split(',')
-        test_points.append(point)
-        time_margin = 0
-
-    for i in range(maxepoch_):
-        sqerrsum = 0.0
-        count = 0
-        for point in test_points:
-            #print(point[1])
-            if point[1] in item_sets_list:
-                print(point[1])
-                i = item_sets_list.index(point[1])
-                for j in range(len(time_ratings[i]) - 1):
-                    if time_ratings[i][j][0] <= point[3] <= time_ratings[i][j + 1][0]:
-                        time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
-                err = ((np.mean(mat[:, i]) * weight + time_margin * (1 - weight)) - point[2])
-                sqerrsum += err**2
-                count += 1
-
-        rmse = math.sqrt(sqerrsum / count)
-        print("epoch %d rmse %f" %(i, rmse))
-        if abs(prevrmse - rmse) < rmse_thrs:
-            break
-        weight = weight + lr
-        print("weight %f" %weight)
-        prevrmse = rmse
-    """
-
-#output code
-"""
-    output = open("output.txt", 'r')
-    for line in output_file:
-        time_margin = 0
-        point = line.split(',')
-        i = item_sets_list.index(point[1])
-        for j in range(len(time_ratings[i]) - 1):
-            if time_ratings[i][j][0] <= point[3] <= time_ratings[i][j + 1][0]:
-                time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
-
-        point[2] = (mat[point[0]][point[1]] + time_margin) / 2
-        output.write(','.join(point) + "\n")
-"""
