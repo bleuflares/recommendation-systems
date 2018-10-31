@@ -27,13 +27,14 @@ def train(U, V, max_user, max_item, k, ratings, lrate=0.035, regularizer=0.01):
     for i in range(max_user):
         for j in range(max_item):
             rating = ratings[i][j]
-            err = rating - predict(U[i], np.transpose(V[:, j]))
-            sse += err**2
-            n += 1
-            uTemp = U[i][k]
-            vTemp = V[k][j]
-            U[i][k] += lrate * (err * vTemp - regularizer * uTemp)
-            V[k][j] += lrate * (err * uTemp - regularizer * vTemp)
+            if rating != 0:
+                err = rating - predict(U[i], np.transpose(V[:, j]))
+                sse += err**2
+                n += 1
+                uTemp = U[i][k]
+                vTemp = V[k][j]
+                U[i][k] += lrate * (err * vTemp - regularizer * uTemp)
+                V[k][j] += lrate * (err * uTemp - regularizer * vTemp)
     return (U, V, math.sqrt(sse / n))
 
 def trainall(U, V, ratings, maxepoch, threshold):
@@ -141,7 +142,7 @@ if __name__ == "__main__":
                 if time_ratings[i][j][0] <= int(point[3]) <= time_ratings[i][j + 1][0]:
                     time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
             err = ((np.mean(mat[:, i]) + time_margin) / 2 - float(point[2]))
-            print("mat mean: %f time_margin:%f, rating: %f, err: %f" (np.mean(mat[:, i]), time_margin, float(point[2]), err))
+            #print("mat mean: %f time_margin:%f, rating: %f, err: %f" %(np.mean(mat[:, i]), time_margin, float(point[2]), err))
             rmse += err**2
             count += 1
         else:
