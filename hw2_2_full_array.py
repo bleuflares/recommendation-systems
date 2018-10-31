@@ -80,7 +80,7 @@ if __name__ == "__main__":
 		rating_sum = 0
 		count = 0
 		for i in range(10):
-			rating = ratings[user_max_idx[i]][j]
+			rating = normalized_ratings[user_max_idx[i]][j]
 			if rating != 0:
 				rating_sum = rating_sum + rating
 				count = count + 1
@@ -125,7 +125,7 @@ if __name__ == "__main__":
 			predicted_item_ratings[i] = 0
 		else:
 			if i == 174 or i == 439 or i ==526 or i == 831 or i == 479:
-				print(j, rating_sum, count)
+				print(i, rating_sum, count)
 			predicted_item_ratings[i] = rating_sum / count
 
 	top5_item_indices = np.argsort(predicted_item_ratings)[-5:][::-1]

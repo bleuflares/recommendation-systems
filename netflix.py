@@ -34,7 +34,7 @@ def train(U, V, max_user, max_item, k, ratings, lrate=0.035, regularizer=0.01):
             vTemp = V[k][j]
             U[i][k] += lrate * (err * vTemp - regularizer * uTemp)
             V[k][j] += lrate * (err * uTemp - regularizer * vTemp)
-    return math.sqrt(sse / n)
+    return (U, V, math.sqrt(sse / n))
 
 def trainall(U, V, ratings, maxepoch, threshold):
     # stub -- initial train error
@@ -48,7 +48,6 @@ def trainall(U, V, ratings, maxepoch, threshold):
                 break
             prevtrainerr = trainerr
     return U, V
-
 
 def get_UV(input_file, feat):
     
@@ -78,7 +77,7 @@ def get_UV(input_file, feat):
 
     avg_rating = 0
     for point in points:
-        ratings[point[0] - 2][items_indices.index(point[1])] = point[2]
+        ratings[point[0] - 2][point[1] - 1] = point[2]
         avg_rating += point[2]
 
     avg_rating = avg_rating / len(points)
@@ -108,7 +107,7 @@ def get_UV(input_file, feat):
     U = np.full((max_user, feat), avg_rating)
     V = np.full((feat, max_item), avg_rating)
 
-    U, V = trainall(U, V, normalized_ratings, 10) #input a normalized rating or original rating?
+    U, V = trainall(U, V, normalized_ratings, 10, 0.1) #input a normalized rating or original rating?
     print(U)
     print(V)
 
@@ -116,7 +115,7 @@ def get_UV(input_file, feat):
 if __name__ == "__main__":
 
     input_file = open(sys.argv[1], 'r')
-    U, V = get_UV(input_file, feat)
+    U, V = get_UV(input_file, 10)
     mat = np.matmul(U, V)
 
     output_file = open(sys.argv[2], 'r')
