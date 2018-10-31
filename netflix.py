@@ -165,9 +165,9 @@ if __name__ == "__main__":
             for j in range(len(time_ratings[i]) - 1):
                 if time_ratings[i][j][0] <= int(point[3]) <= time_ratings[i][j + 1][0]:
                     #time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
-                    time_margin = trending_margin * j / len(time_ratings[i]) - 1
+                    time_margin = trending_margin[i] * j / (len(time_ratings[i]) - 1)
                     break
-            prediction = np.mean(mat[:, i]) + time_margin[i]
+            prediction = np.mean(mat[:, i]) + time_margin
             if prediction > 5:
                 prediction = 5
             if prediction < 1:
