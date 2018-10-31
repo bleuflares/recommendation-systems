@@ -178,8 +178,7 @@ if __name__ == "__main__":
             count += 1
         else:
             no_count += 1
-    print(rmse/count)
-    print(no_count)
+    print(math.sqrt(rmse / count))
 
 #weight computition code
     """
