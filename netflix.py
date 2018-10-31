@@ -49,39 +49,53 @@ def trainall(U, V, ratings, maxepoch, threshold):
             prevtrainerr = trainerr
     return U, V
 
-def get_UV(input_file, feat):
+def get_UV(ratings, user_sets_list, item_sets_list, avg_rating, feat):
     
-   points = []
+    #user 1 does not exist starts from 2
+    max_user = len(user_sets_list)
+    max_item = len(item_sets_list)
 
+    uv_init = math.sqrt(avg_rating / feat)
+    print(uv_init)
+
+    U = np.full((max_user, feat), uv_init)
+    V = np.full((feat, max_item), uv_init)
+
+    U, V = trainall(U, V, ratings, 10, 0.1) #input a normalized rating or original rating?
+    return (U, V)
+
+if __name__ == "__main__":
+
+    input_file = open(sys.argv[1], 'r')
     user_sets = set()
     item_sets = set()
-
+    points = []
+    time_points = []
     for line in input_file:
         point = line.split(',')
         user_sets.add(int(point[0]))
         item_sets.add(int(point[1]))
+        print(point[1])
         points.append([int(point[0]), int(point[1]), float(point[2])])
-
-    #user 1 does not exist starts from 2
-    max_user = len(user_sets)
-    max_item = len(item_sets)
-
+        time_points.append([int(point[3]), int(point[1]), float(point[2])])
+    
+    time_points.sort(key=lambda arr: arr[0])
+    user_sets_list = sorted(list(user_sets))
     item_sets_list = sorted(list(item_sets))
-    max_1000 = 0
-    for i in range(1000):
-        if i in item_sets_list:
-            if i > max_1000:
-                max_1000 = i
-    max_idx = item_sets_list.index(max_1000) + 1
-    ratings = np.zeros((max_user, max_item))
 
-    for point in points:
-        ratings[point[0] - 2][item_sets_list.index(point[1])] = point[2]
-
+    max_user = len(user_sets_list)
+    max_item = len(item_sets_list)
     print("max user is", max_user)
     print("max item is", max_item)
-    #print(ratings[0])
 
+    ratings = np.zeros((max_user, max_item))
+    avg_rating = 0
+    for point in points:
+        ratings[user_sets_list.index(point[0]) - 2][item_sets_list.index(point[1])] = point[2]
+        avg_rating += point[2]
+    avg_rating = avg_rating / len(points)
+
+    """
     user_means = []
     for i in range(max_user):
         user_mean = 0
@@ -95,69 +109,55 @@ def get_UV(input_file, feat):
         else:
             user_means.append(0)
 
-    """
     normalized_ratings = np.zeros((max_user, max_item))
     for i in range(max_user):
         for j in range(max_item):
             if ratings[i][j] != 0:
                 normalized_ratings[i][j] = ratings[i][j] - user_means[i]
     """
-    uv_init = mat.sqrt(avg_rating / feat)
-    U = np.full((max_user, feat), uv_init)
-    V = np.full((feat, max_item), uv_init)
-
-    U, V = trainall(U, V, ratings, 10, 0.1) #input a normalized rating or original rating?
-    print(U)
-    print(V)
-
-
-if __name__ == "__main__":
-
-    input_file = open(sys.argv[1], 'r')
-    U, V = get_UV(input_file, 10)
-    mat = np.matmul(U, V)
-
-    output_file = open(sys.argv[2], 'r')
-
-    for line in input_file:
-        point = line.split(',')
-        user_sets.add(int(point[0]))
-        item_sets.add(int(point[1]))
-        points.append([int(point[3]), int(point[1]), float(point[2])])
-        points.sort(key=lambda arr: arr[0])
-
-    item_list = sorted(list(item_sets))
-    item_counts = len(item_list)
 
     time_ratings = []
-    for i in range(item_counts):
+    for i in range(len(item_sets_list)):
         time_rating = []
-        for point in points:
-            if item_sets[i] == point[1]:
+        for point in time_points:
+            if item_sets_list[i] == point[1]:
                 time_rating.append((point[0], point[2]))
         time_ratings.append(time_rating)
 
+    #finished with input processing
+
+    U, V = get_UV(ratings, user_sets_list, item_sets_list, avg_rating, 10)
+    mat = np.matmul(U, V)
+    print(mat)
+    output_file = open(sys.argv[2], 'r')
+
     rmse = 0.0
     count = 0
+    no_count = 0
     for line in output_file:
         time_margin = 0
         point = line.split(',')
-        i = item_list.index(point[1])
-        for j in range(len(time_ratings[i]) - 1):
-            if time_ratings[i][j][0] <= point[3] <= time_ratings[i][j + 1][0]:
-                time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
-
-        err = ((mat[point[0]][point[1]] + time_margin) / 2 - point[2])
-        rmse += err**2
-        count += 1
+        #print(point[1])
+        if point[1] in item_sets_list:
+            print(point[1])
+            i = item_sets_list.index(point[1])
+            for j in range(len(time_ratings[i]) - 1):
+                if time_ratings[i][j][0] <= point[3] <= time_ratings[i][j + 1][0]:
+                    time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
+            err = ((np.mean(mat[:, i]) + time_margin) / 2 - point[2])
+            rmse += err**2
+            count += 1
+        else:
+            no_count += 1
     print(rmse/count)
+    print(no_count)
 
     """
     output = open("output.txt", 'r')
     for line in output_file:
         time_margin = 0
         point = line.split(',')
-        i = item_list.index(point[1])
+        i = item_sets_list.index(point[1])
         for j in range(len(time_ratings[i]) - 1):
             if time_ratings[i][j][0] <= point[3] <= time_ratings[i][j + 1][0]:
                 time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
