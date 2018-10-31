@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     #finished with input processing
 
-    U, V = get_UV(ratings, max_user, max_item, avg_rating, 10)
+    U, V = get_UV(ratings, max_user, max_item, avg_rating, 20)
     mat = np.matmul(U, V)
     #print(mat)
 
@@ -180,8 +180,44 @@ if __name__ == "__main__":
             no_count += 1
     print(math.sqrt(rmse / count))
 
+"""
+regression code
+weight = 1.0
+    lr = 0.01
+    prevrmse = 0.8
+
+    output_file = open(sys.argv[2], 'r')
+    rmse = 0.0
+    count = 0
+    no_count = 0
+
+    #0:time 1: id 2: rating
+    for point in test_points:
+        time_margin = 0
+        if int(point[1]) in item_sets_list:
+            i = item_sets_list.index(point[1])
+            for j in range(len(time_ratings[i]) - 1):
+                if time_ratings[i][j][0] <= point[0] <= time_ratings[i][j + 1][0]:
+                    #time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
+                    time_margin = trending_margin[i] * j / (len(time_ratings[i]) - 1)
+                    break
+            prediction = np.mean(mat[:, i]) + weight * time_margin
+            if prediction > 5:
+                prediction = 5
+            if prediction < 1:
+                prediction = 1
+            err = (prediction - point[2])
+            #print("mat mean: %f time_margin:%f, rating: %f, err: %f" %(np.mean(mat[:, i]), time_margin, float(point[2]), err))
+            rmse += err**2
+            count += 1
+        else:
+            no_count += 1
+    print(math.sqrt(rmse / count))
+"""
+
+
 #weight computition code
-    """
+"""
         U, V = get_UV(ratings, user_sets_list, item_sets_list, avg_rating, 10)
     mat = np.matmul(U, V)
     print(mat)
@@ -223,7 +259,7 @@ if __name__ == "__main__":
     """
 
 #output code
-    """
+"""
     output = open("output.txt", 'r')
     for line in output_file:
         time_margin = 0
@@ -235,10 +271,10 @@ if __name__ == "__main__":
 
         point[2] = (mat[point[0]][point[1]] + time_margin) / 2
         output.write(','.join(point) + "\n")
-    """
+"""
 
 #margin code may use or not
-    """
+"""
     trending_margin = np.array(max_item)
     for i in range(max_item):
         item_row = trending[i]
@@ -250,4 +286,4 @@ if __name__ == "__main__":
         trending_margin[i] = item_margin
 
     margin_mean = np.mean(trending_margin)
-    """
+"""
