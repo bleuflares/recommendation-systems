@@ -154,7 +154,7 @@ if __name__ == "__main__":
     #print(mat)
 
     output_file = open(sys.argv[2], 'r')
-    weight = 1.25
+    weight = 1.15
     rmse = 0.0
     count = 0
     for line in output_file:
