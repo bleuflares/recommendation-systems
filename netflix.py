@@ -147,8 +147,8 @@ if __name__ == "__main__":
     test_file = open(sys.argv[2], 'r')
     output_file = open("output.txt", 'w')
     weight = 1.0
-    rmse = 0.0
-    count = 0
+    #rmse = 0.0
+    #count = 0
     #apply time margin and write output
     for line in test_file:
         time_margin = 0
@@ -165,11 +165,11 @@ if __name__ == "__main__":
                 prediction = 5.0
             if prediction < 1.0:
                 prediction = 1.0
-            err = (prediction - float(point[2]))
-            rmse += err**2
-            count += 1
-        output_file.write(','.join([point[0], point[1], prediction, point[3]]))
+            #err = (prediction - float(point[2]))
+            #rmse += err**2
+            #count += 1
+        output_file.write(','.join([str(point[0]), str(point[1]), str(prediction), str(point[3])]))
     #rsme value
-    print(math.sqrt(rmse / count))
+    #print(math.sqrt(rmse / count))
     output_file.close()
     test_file.close()
