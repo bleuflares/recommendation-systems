@@ -44,7 +44,7 @@ def trainall(U, V, ratings, maxepoch, threshold):
     for k in range(feat):
         for epoch in range(maxepoch):
             U, V, trainerr = train(U, V, max_user, max_item, k, ratings)
-            if abs(oldtrainerr - trainerr) < threshold:
+            if abs(prevtrainerr - trainerr) < threshold:
                 break
             prevtrainerr = trainerr
     return U, V
@@ -104,8 +104,9 @@ def get_UV(input_file, feat):
             if ratings[i][j] != 0:
                 normalized_ratings[i][j] = ratings[i][j] - user_means[i]
 
-    U = np.full((max_user, feat), avg_rating)
-    V = np.full((feat, max_item), avg_rating)
+    uv_init = mat.sqrt(avg_rating / feat)
+    U = np.full((max_user, feat), uv_init)
+    V = np.full((feat, max_item), uv_init)
 
     U, V = trainall(U, V, normalized_ratings, 10, 0.1) #input a normalized rating or original rating?
     print(U)
