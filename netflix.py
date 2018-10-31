@@ -51,39 +51,36 @@ def trainall(U, V, ratings, maxepoch, threshold):
 
 def get_UV(input_file, feat):
     
-    max_user = 0
-    max_item = 0
-    item_sets = set()
+   points = []
 
-    points = []
+    user_sets = set()
+    item_sets = set()
 
     for line in input_file:
         point = line.split(',')
+        user_sets.add(int(point[0]))
         item_sets.add(int(point[1]))
-        if max_user < int(point[0]):
-            max_user = int(point[0])
-        if max_item < int(point[1]):
-            max_item = int(point[1])
         points.append([int(point[0]), int(point[1]), float(point[2])])
 
-    item_sets_list = list(item_sets)
+    #user 1 does not exist starts from 2
+    max_user = len(user_sets)
+    max_item = len(item_sets)
 
-    max_user = max_user - 1
-    
-    print(max_user)
-    print(max_item)
-    
+    item_sets_list = sorted(list(item_sets))
+    max_1000 = 0
+    for i in range(1000):
+        if i in item_sets_list:
+            if i > max_1000:
+                max_1000 = i
+    max_idx = item_sets_list.index(max_1000) + 1
     ratings = np.zeros((max_user, max_item))
 
-    avg_rating = 0
     for point in points:
-        ratings[point[0] - 2][point[1] - 1] = point[2]
-        avg_rating += point[2]
-
-    avg_rating = avg_rating / len(points)
+        ratings[point[0] - 2][item_sets_list.index(point[1])] = point[2]
 
     print("max user is", max_user)
     print("max item is", max_item)
+    #print(ratings[0])
 
     user_means = []
     for i in range(max_user):
@@ -98,17 +95,18 @@ def get_UV(input_file, feat):
         else:
             user_means.append(0)
 
+    """
     normalized_ratings = np.zeros((max_user, max_item))
     for i in range(max_user):
         for j in range(max_item):
             if ratings[i][j] != 0:
                 normalized_ratings[i][j] = ratings[i][j] - user_means[i]
-
+    """
     uv_init = mat.sqrt(avg_rating / feat)
     U = np.full((max_user, feat), uv_init)
     V = np.full((feat, max_item), uv_init)
 
-    U, V = trainall(U, V, normalized_ratings, 10, 0.1) #input a normalized rating or original rating?
+    U, V = trainall(U, V, ratings, 10, 0.1) #input a normalized rating or original rating?
     print(U)
     print(V)
 
