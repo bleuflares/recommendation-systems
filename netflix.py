@@ -58,7 +58,7 @@ def get_UV(ratings, max_user, max_item, avg_rating, feat):
     U = np.full((max_user, feat), uv_init)
     V = np.full((feat, max_item), uv_init)
 
-    U, V = trainall(U, V, ratings, 10, 0.075) #input a normalized rating or original rating?
+    U, V = trainall(U, V, ratings, 10, 0.1) #input a normalized rating or original rating?
     return (U, V)
 
 if __name__ == "__main__":
@@ -165,7 +165,7 @@ if __name__ == "__main__":
             for j in range(len(time_ratings[i]) - 1):
                 if time_ratings[i][j][0] <= int(point[3]) <= time_ratings[i][j + 1][0]:
                     #time_margin = (time_ratings[i][j][1] + time_ratings[i][j + 1][1]) / 2
-                    time_margin = trending_margin[i] * j / (len(time_ratings[i]) - 1)
+                    time_margin = trending_margin[i]
                     break
             prediction = np.mean(mat[:, i]) + weight * time_margin
             if prediction > 5:
