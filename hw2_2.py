@@ -138,12 +138,10 @@ if __name__ == "__main__":
 	print(top5_item_indices)
 
 	for i in range(len(top5_item_indices)):
-		print("ratings", predicted_item_ratings[top5_item_indices[i]])
-		print("counts", counts[top5_item_indices[i]])
 
 		"""
 		print(top5_item_indices[i])#index of movies rated as top 5
 		print(item_sets_list[top5_item_indices[i]]) # id of the movie with the index
 		print(predicted_user_ratings[top5_user_indices[i]] + user_means[598]) # top 5 ratings
 		"""
-		print("%d\t%f" %(item_sets_list[top5_item_indices[i]], predicted_item_ratings[top5_user_indices[i]]))
+		print("%d\t%f" %(item_sets_list[top5_item_indices[i]], predicted_item_ratings[top5_item_indices[i]]))
