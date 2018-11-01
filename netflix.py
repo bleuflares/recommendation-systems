@@ -51,6 +51,26 @@ def get_UV(ratings, max_user, max_item, avg_rating, feat):
     U, V = trainall(U, V, ratings, 10, 0.05) #input a normalized rating or original rating?
     return (U, V)
 
+#cosine distance function
+def cosine_distance(arr1, arr2):
+    dot = np.sum(np.dot(arr1, arr2))
+    length1 = np.sum(np.dot(arr1, arr1))
+    length2 = np.sum(np.dot(arr2, arr2))
+    if length1 == 0 or length2 == 0:
+        return 99999999
+    else:
+        return 1 - dot / (math.sqrt(length1) * math.sqrt(length2))
+
+def get_user_based(max_user, normalized_ratings, user_idx):
+    #find 10 users with minimum cosine distance
+    user_distances = np.zeros(max_user)
+    for i in range(max_user):
+        if i != user_idx:
+            user_distances[i] = cosine_distance(normalized_ratings[user_idx], normalized_ratings[i])
+    user_distances[user_idx] = 99999999
+
+    return np.argsort(user_distances)[:10]
+
 if __name__ == "__main__":
 
 #read input, store user-item-rating and item-time-rating
@@ -94,13 +114,13 @@ if __name__ == "__main__":
             user_means.append(user_mean / user_count)
         else:
             user_means.append(0)
-    """
+    
+    #get normalized ratings matrix
     normalized_ratings = np.zeros((max_user, max_item))
     for i in range(max_user):
         for j in range(max_item):
             if ratings[i][j] != 0:
                 normalized_ratings[i][j] = ratings[i][j] - user_means[i]
-    """
 
     #record a time rating of each movies
     time_ratings = []
@@ -166,7 +186,17 @@ if __name__ == "__main__":
             if prediction < 1.0:
                 prediction = 1.0
         elif int(point[0]) in user_sets_list:
-            prediction = user_means[user_sets_list.index(int(point[0]))]
+            sim_users = prediction = get_user_based(max_user, normalized_ratings, user_sets_list.index(int(point[0])))
+            user_rating = 0
+            user_count = 0
+            for user in sim_users:
+                if user_means[user] != 0:
+                    user_rating += user_means[user]
+                    user_count += 1
+            if user_count != 0:
+                prediction = user_rating / user_count
+            else:
+                prediction = avg_rating
         else:
             prediction = avg_rating
             
