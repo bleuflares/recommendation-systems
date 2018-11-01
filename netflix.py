@@ -81,7 +81,7 @@ if __name__ == "__main__":
         avg_rating += point[2]
     avg_rating = avg_rating / len(points)
 
-    """
+    #later used for movies that does not exist in V
     user_means = []
     for i in range(max_user):
         user_mean = 0
@@ -94,7 +94,7 @@ if __name__ == "__main__":
             user_means.append(user_mean / user_count)
         else:
             user_means.append(0)
-    
+    """
     normalized_ratings = np.zeros((max_user, max_item))
     for i in range(max_user):
         for j in range(max_item):
@@ -165,11 +165,10 @@ if __name__ == "__main__":
                 prediction = 5.0
             if prediction < 1.0:
                 prediction = 1.0
-            #err = (prediction - float(point[2]))
-            #rmse += err**2
-            #count += 1
+        elif int(point[0]) in user_sets_list:
+            prediction = user_means[user_sets_list.index(int(point[0]))]
+        else:
+            prediction = avg_rating
         output_file.write(','.join([str(point[0]), str(point[1]), str(prediction), str(point[3])]))
-    #rsme value
-    #print(math.sqrt(rmse / count))
     output_file.close()
     test_file.close()
